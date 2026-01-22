@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UAS Bahasa Indonesia - SiberMu</title>
+    <!-- Menggunakan Tailwind CSS untuk styling cepat dan responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar untuk navigasi soal */
+        .question-grid::-webkit-scrollbar {
+            width: 6px;
+        }
+        .question-grid::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .question-grid::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        .option-label {
+            transition: all 0.2s;
+        }
+        .option-radio:checked + .option-label {
+            background-color: #ebf8ff; /* blue-50 */
+            border-color: #3182ce; /* blue-600 */
+            color: #2c5282; /* blue-800 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="bg-indigo-700 text-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div>
+                <h1 class="text-lg font-bold md:text-xl">UAS Bahasa Indonesia</h1>
+                <p class="text-xs text-indigo-200">Simulasi Ujian Akhir Semester</p>
+            </div>
+            <div id="timer-container" class="hidden bg-indigo-800 px-3 py-1 rounded-md border border-indigo-500">
+                <span class="text-sm font-mono" id="timer">00:00:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 py-6 max-w-5xl">
+        
+        <!-- Halaman Awal (Intro) -->
+        <div id="intro-screen" class="bg-white rounded-xl shadow-lg p-8 max-w-2xl mx-auto text-center">
+            <div class="mb-6">
+                <svg class="w-20 h-20 mx-auto text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-4">Selamat Datang di Simulasi UAS</h2>
+            <p class="text-gray-600 mb-6">
+                Mata Kuliah: <strong>Bahasa Indonesia</strong><br>
+                Jumlah Soal: <strong>30 Pilihan Ganda</strong><br>
+                Waktu Pengerjaan: <strong>60 Menit</strong>
+            </p>
+            <ul class="text-left text-sm text-gray-600 bg-indigo-50 p-4 rounded-lg mb-8 space-y-2">
+                <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> Materi mencakup Teknik Pengutipan, Daftar Pustaka, & Penulisan Ilmiah.</li>
+                <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> Jawaban disesuaikan dengan koreksi video terbaru.</li>
+                <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> Nilai akan langsung muncul setelah selesai.</li>
+            </ul>
+            <button onclick="startExam()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
+                Mulai Ujian Sekarang
+            </button>
+        </div>
+
+        <!-- Halaman Ujian -->
+        <div id="exam-screen" class="hidden flex flex-col md:flex-row gap-6">
+            
+            <!-- Area Soal (Kiri) -->
+            <div class="w-full md:w-3/4">
+                <div class="bg-white rounded-xl shadow-md p-6 min-h-[400px]">
+                    <div class="flex justify-between items-center mb-4 border-b pb-4">
+                        <span class="text-sm font-semibold text-gray-500">Soal No. <span id="q-number">1</span></span>
+                        <span class="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-bold" id="q-status">Belum Dijawab</span>
+                    </div>
+                    
+                    <div id="question-text" class="text-lg font-medium mb-6 leading-relaxed">
+                        <!-- Soal akan muncul di sini -->
+                    </div>
+
+                    <div id="options-container" class="space-y-3">
+                        <!-- Opsi jawaban akan muncul di sini -->
+                    </div>
+                </div>
+
+                <!-- Navigasi Bawah -->
+                <div class="flex justify-between mt-6">
+                    <button id="btn-prev" onclick="prevQuestion()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg disabled:opacity-50">
+                        &larr; Sebelumnya
+                    </button>
+                    <button id="btn-next" onclick="nextQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg">
+                        Selanjutnya &rarr;
+                    </button>
+                    <button id="btn-finish" onclick="confirmFinish()" class="hidden bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg">
+                        Selesai Ujian
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar Navigasi Soal (Kanan) -->
+            <div class="w-full md:w-1/4">
+                <div class="bg-white rounded-xl shadow-md p-4 sticky top-20">
+                    <h3 class="font-bold text-gray-700 mb-3 border-b pb-2">Navigasi Soal</h3>
+                    <div id="question-grid" class="question-grid grid grid-cols-5 gap-2 max-h-[60vh] overflow-y-auto pr-1">
+                        <!-- Grid nomor soal -->
+                    </div>
+                    <div class="mt-4 pt-3 border-t text-xs text-gray-500 space-y-2">
+                        <div class="flex items-center"><div class="w-3 h-3 bg-gray-200 border border-gray-300 rounded mr-2"></div> Belum dijawab</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-indigo-600 rounded mr-2"></div> Sudah dijawab</div>
+                        <div class="flex items-center"><div class="w-3 h-3 bg-yellow-400 border border-yellow-500 rounded mr-2"></div> Sedang dibuka</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Halaman Hasil -->
+        <div id="result-screen" class="hidden max-w-3xl mx-auto">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-600 to-indigo-800 p-8 text-center text-white">
+                    <h2 class="text-3xl font-bold mb-2">Hasil Ujian</h2>
+                    <p class="opacity-90">Bahasa Indonesia</p>
+                </div>
+                
+                <div class="p-8 text-center">
+                    <div class="flex justify-center items-center mb-6">
+                        <div class="w-40 h-40 rounded-full border-8 border-indigo-100 flex items-center justify-center bg-indigo-50">
+                            <div>
+                                <span id="final-score" class="text-5xl font-bold text-indigo-700">0</span>
+                                <span class="block text-sm text-gray-500 mt-1">Skor Akhir</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-4 mb-8 text-center">
+                        <div class="p-4 bg-green-50 rounded-lg">
+                            <span class="block text-2xl font-bold text-green-600" id="total-correct">0</span>
+                            <span class="text-xs text-gray-600">Benar</span>
+                        </div>
+                        <div class="p-4 bg-red-50 rounded-lg">
+                            <span class="block text-2xl font-bold text-red-600" id="total-wrong">0</span>
+                            <span class="text-xs text-gray-600">Salah</span>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <span class="block text-2xl font-bold text-gray-600" id="total-skipped">0</span>
+                            <span class="text-xs text-gray-600">Dilewati</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-4">
+                        <button onclick="location.reload()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
+                            Ulangi Ujian
+                        </button>
+                        <button onclick="showReview()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">
+                            Lihat Pembahasan
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Area Pembahasan -->
+            <div id="review-container" class="mt-8 space-y-6 hidden">
+                <h3 class="text-xl font-bold text-gray-800 ml-2">Pembahasan Jawaban</h3>
+                <!-- List pembahasan akan di-render di sini -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal Konfirmasi Selesai -->
+    <div id="modal-confirm" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-6 max-w-sm w-full mx-4 shadow-xl">
+            <h3 class="text-lg font-bold mb-2">Selesaikan Ujian?</h3>
+            <p class="text-gray-600 mb-6">Pastikan Anda sudah memeriksa kembali jawaban Anda. Waktu akan dihentikan dan skor akan dihitung.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button>
+                <button onclick="calculateResult()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">Ya, Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Soal UAS Bahasa Indonesia
+        const questionsData = [
+            {
+                id: 1,
+                question: "Teknik pengutipan yang tepat atas nama Dedi Supriadi adalah ...",
+                options: {
+                    a: "Menurut (Dedi Supriadi, 2000: 47) menjelaskan tingkat kepemilikan peserta didik akan buku dan fasilitas lain berkorelasi positif dengan prestasi belajar peserta didik.",
+                    b: "(Dedi Supriadi, 2000: 47) menjelaskan tingkat kepemilikan peserta didik akan buku dan fasilitas lain berkorelasi positif dengan prestasi belajar peserta didik.",
+                    c: "Dedi Supriadi (2000: 47) menjelaskan tingkat kepemilikan peserta didik akan buku dan fasilitas lain berkorelasi positif dengan prestasi belajar peserta didik.",
+                    d: "Menurut (Supriadi, 2000, 47) tingkat kepemilikan peserta didik akan buku dan fasilitas lain berkorelasi positif dengan prestasi belajar peserta didik.",
+                    e: "Supriadi (2000: 47) menjelaskan, tingkat kepemilikan peserta didik akan buku dan fasilitas lain berkorelasi positif dengan prestasi belajar peserta didik."
+                },
+                correct: "e"
+            },
+            {
+                id: 2,
+                question: "Penulisan pengutipan yang benar dari sumber penulis Azhar Azhari, tahun 2001, dan halaman yang dikutip 75-76 berikut adalah ...",
+                options: {
+                    a: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhari, 2001: 75-76).",
+                    b: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhari, 2001: 75-76).",
+                    c: "(Azhar Azhari, 2001) ada beberapa kriteria yang patut diperhatikan dalam memilih media.",
+                    d: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhar Azhari, 2001: 75-76)."
+                },
+                correct: "b"
+            },
+            {
+                id: 3,
+                question: "Penulisan pengutipan atas nama Dadang Solihin berikut yang benar adalah ...",
+                options: {
+                    a: "Kendaraan bermotor merupakan semua kendaraan beroda dua atau lebih beserta gandengannya yang digunakan di semua jenis jalan (Solihin, 2001: 266).",
+                    b: "Menurut (Dadang, 2001: 266).Kendaraan bermotor merupakan semua kendaraan beroda dua atau lebih beserta gandengannya yang digunakan di semua jenis jalan.",
+                    c: "Kendaraan bermotor merupakan semua kendaraan beroda dua atau lebih beserta gandengannya yang digunakan di semua jenis jalan (Dadang Solihin, 2001: 266).",
+                    d: "(Solihin, Dadang 2001: 266).Kendaraan bermotor merupakan semua kendaraan beroda dua atau lebih beserta gandengannya yang digunakan di semua jenis jalan."
+                },
+                correct: "a"
+            },
+            {
+                id: 4,
+                question: "Penulisan judul karya tulis ilmiah yang tepat berikut adalah ...",
+                options: {
+                    a: "ANALISIS PENGARUH DIFERENSIASI PRODUK TERHADAP KEPUASAN KONSUMEN PADA TOKO DUA MOTOR BITUNG",
+                    b: "ANALISIS PENGARUH DIFERENSIASI PRODUK TERHADAP KEPUASAN KONSUMEN PADA TOKO DUA MOTOR BITUNG.",
+                    c: "Analisis Pengaruh Diferensiasi Produk Terhadap Kepuasan Konsumen Pada Toko Dua Motor Bitung",
+                    d: "Analisis pengaruh diferensiasi produk terhadap kepuasan konsumen pada toko dua motor bitung"
+                },
+                correct: "b"
+            },
+            {
+                id: 5,
+                question: "Penulisan penutipan yang benar dari sumber Gunawan Dwi Nugroho tahun 2008 adalah ...",
+                options: {
+                    a: "Dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor (Nugroho, 2008).",
+                    b: "Menurut (Nugroho, Gunawan Dwi: 2008), dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor.",
+                    c: "Dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor (Nugroho, 2008).",
+                    d: "Menurut Gunawan Dwi Nugroho (2008), dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor."
+                },
+                correct: "c"
+            },
+            {
+                id: 6,
+                question: "Dari data berikut : (1) Buku berjudul Penggunaan Bahasa Indonesia dalam Surat Dinas, dikarang oleh E. Zainal Arifin. Buku tersebut diterbitkan oleh PT Mediatama Sarana di Jakarta tahun 1987. (2) Buku berjudul Penelitian Agama Masalah dan Pemikiran, ditulis oleh Mulyanto Sumardi pada tahun 1982. Buku tersebut diterbitkan oleh Pustaka Sinar Harapan di Jakarta. Bentuk penulisan daftar pustaka yang tepat untuk kedua buku tersebut adalah ...",
+                options: {
+                    a: "Arifin, E. Zainal. 1987. Penggunaan Bahasa Indonesia dalam Surat Dinas. Jakarta: PT Mediatama Sarana. Sumardi, Mulyanto. 1982. Penelitian Agama Masalah dan Pemikiran. Jakarta: Pustaka Sinar Harapan.",
+                    b: "Arifin E. Zainal Penggunaan Bahasa Indonesia dalam Surat Dinas. 1987. Jakarta: PT Mediatama Sarana. Sumardi, Mulyanto. Penelitian Agama Masalah dan Pemikiran. 1982. Pustaka Sinar Harapan. Jakarta.",
+                    c: "Arifin, E. Zainal, 1987, Penggunaan Bahasa Indonesia dalam Surat Dinas. Jakarta: PT Mediatama Sarana: Jakarta. Sumardi, Mulyanto. 1982. Penelitian Agama Masalah dan Pemikiran. Pustaka Sinar Harapan: Jakarta.",
+                    d: "Arifin E., Zainal. Penggunaan Bahasa Indonesia dalam Surat Dinas. 1987. Jakarta: PT Mediatama Sarana. Sumardi; Mulyanto. Penelitian Agama Masalah dan Pemikiran. 1982. Jakarta: Pustaka Sinar Harapan."
+                },
+                correct: "a"
+            },
+            {
+                id: 7,
+                question: "Penulisan daftar pustaka dari sumber internet atas nama Mark Gorkin yang benar adalah ....",
+                options: {
+                    a: "M. Gorkin. 2011. Listening, Learning and Leading Technical Skill and Motivational Art. Diambil 25 Juni 2011, dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf. Pada pukul 20.00",
+                    b: "Diambil 25 Juni 2011, dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf. Pada 20.00",
+                    c: "Gorkin, M. 2011. Listening, Learning and Leading Technical Skill and Motivational Art. Diambil 25 Juni 2011, dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf. Pada pukul 20.00",
+                    d: "http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf"
+                },
+                correct: "c"
+            },
+            {
+                id: 8,
+                question: "Teknik pengutipan yang tepat atas nama Musa Musabbih adalah ...",
+                options: {
+                    a: "Menurut Musa Musabbih (2010: 50) buku teks adalah buku yang berisi uraian materi yang disusun secara sistematis dan telah diseleksi berdasarkan tujuan tertentu.",
+                    b: "Buku teks menurut (Musa Musabbih, 2010: 50) adalah buku yang berisi uraian materi yang disusun secara sistematis dan telah diseleksi berdasarkan tujuan tertentu.",
+                    c: "Menurut (Musabbih: 2010, 50) buku teks adalah buku yang berisi uraian materi yang disusun secara sistematis dan telah diseleksi berdasarkan tujuan tertentu.",
+                    d: "Buku teks menurut Musabbih (2010: 50) adalah buku yang berisi uraian materi yang disusun secara sistematis dan telah diseleksi berdasarkan tujuan tertentu."
+                },
+                correct: "d"
+            },
+            {
+                id: 9,
+                question: "Penulisan daftar pustaka yang tepat dari sumber (Judul: Ranjang Prokustes, Penulis: Nasim Nicholas Taleb, Penerbit: Gramedia, tahun 2011 yang benar adalah",
+                options: {
+                    a: "Taleb, Nasim Nicholas. Ranjang Prokutes. Jakarta: Gramedia. 2011.",
+                    b: "Nasim Nicholas Taleb. Ranjang Prokutes. Jakarta: Gramedia. 2011.",
+                    c: "Taleb, Nasim Nicholas. 2011. Ranjang Prokutes. Jakarta: Gramedia.",
+                    d: "Nasim Nicholas Taleb. 2011.Ranjang Prokutes. Jakarta: Gramedia."
+                },
+                correct: "c"
+            },
+            {
+                id: 10,
+                question: "Penulisan daftar pustaka dari sumber Purnama Bagus diambil dari internet yang benar adalah ...",
+                options: {
+                    a: "Bagus, Purnama. 2013. Pengertian Pompa. Diakses dari: http://purnama.bgp.blogspot.com/2013/06/pengertian.pompa.html. Pada 8 April 2015.",
+                    b: "Onny Apriyahanda. 2014. Pengertian Pompa. Diakses dari: http://purnama-bgp.blogspot.com/2013/06/pengertian.pompa.html. Pada 8 April 2015.",
+                    c: "Diakses dari: http://purnama-bgp.blogspot.com/2013/06/pengertian.pompa.html. Pada 8 April 2015.",
+                    d: "Apriyahanda, Onny. Pengertian Pompa. Diakses dari: http://purnama-bgp.blogspot.com/2013/06/pengertian.pompa.html. Pada 8 April 2014.."
+                },
+                correct: "a"
+            },
+            {
+                id: 11,
+                question: "Penulisan pengutipan footnote yang benar dari sumber penulis Azhar Arsyad, tahun 2001, dan halaman yang dikutip 75-76 berikut adalah ...",
+                options: {
+                    a: "Arsyad, Azhar, Media Pembelajaran Aktif, Yogyakarta: Bintang Pustaka, 2001, Hal. 75-76.",
+                    b: "Azhar Arsyad, 2001, Media Pembelajaran Aktif, Yogyakarta: Bintang Pustaka, Hal. 75-76.",
+                    c: "Azhar Arsyad, Media Pembelajaran Aktif, Yogyakarta: Bintang Pustaka, 2001, Hal. 75-76.",
+                    d: "Arsyad, Azhar, 2001, Media Pembelajaran Aktif, Yogyakarta: Bintang Pustaka, Hal. 75-76."
+                },
+                correct: "c"
+            },
+            {
+                id: 12,
+                question: "Penulisan daftar pustaka dari sumber Onny Apriyahanda (2014) dari internet yang benar adalah ...",
+                options: {
+                    a: "Apriyahanda, Onny. Macam-Macam Pompa Positive Displacement. Diakses dari: http://artikel-teknologi.com/macam-macam-pompa-positive-displacement. Pada 8 April 2014.",
+                    b: "Diakses dari: http://artikel-teknologi.com/macam-macam-pompa-positive-displacement. Pada 8 April 2015.",
+                    c: "Apriyahanda, Onny. 2014. Macam-Macam Pompa Positive Displacement. Diakses dari: http://artikel-teknologi.com/macam-macam-pompa-positive-displacement. Pada 8 April 2015.",
+                    d: "Onny Apriyahanda. 2014. Macam-Macam Pompa Positive Displacement. Diakses dari: http://artikel-teknologi.com/macam-macam-pompa-positive-displacement. Pada 8 April 2015"
+                },
+                correct: "c"
+            },
+            {
+                id: 13,
+                question: "Penulisan daftra pustaka yang benar dari sumber Subroto di dalam tulisan B.S. Anwir terbit tahun 1986 adalah...",
+                options: {
+                    a: "Subroto, Joko dalam Anwir, B.S. 1986. Menggunakan Peralatan Pembanding dan Perkakas Tangan. Jakarta: Bhratara Karya Aksara",
+                    b: "Anwir, B.S. 1986. Menggunakan Peralatan Pembanding dan Perkakas Tangan. Jakarta: Bhratara Karya Aksara",
+                    c: "Subroto dalam B.S. Anwir. 1986. Menggunakan Peralatan Pembanding dan Perkakas Tangan. Jakarta: Bhratara Karya Aksara",
+                    d: "Subroto, Joko. 1986. Menggunakan Peralatan Pembanding dan Perkakas Tangan. Jakarta: Bhratara Karya Aksara"
+                },
+                correct: "b"
+            },
+            {
+                id: 14,
+                question: "Penulisan footnote dari Mark Gorkin (2011) berikut yang tepat adalah ....",
+                options: {
+                    a: "Mark Gorkin, Listening, Learning and Leading Technical Skill and Motivational Art, 2011, Diambil dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf, pada 25 Juni 2011, pukul 20.00 WIB",
+                    b: "Mark Gorkin, 2011, Diambil 25 Juni 2011, dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf. Pada 20.00",
+                    c: "Mark Gorkin, 2011, Listening, Learning and Leading Technical Skill and Motivational Art, diakses dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf. Pada 20.00 WIB.",
+                    d: "Gorkin, M. Listening, Learning and Leading Technical Skill and Motivational Art. 2011. Diambil 25 Juni 2011, dari http://www.appleseeds.org/PDF files/05_06/Listening Skills.pdf. Pada pukul 20.00"
+                },
+                correct: "a"
+            },
+            {
+                id: 15,
+                question: "Penulisan pengutipan dari sumber Purnama Bagus terbit tahun 2013 yang benar adalah ...",
+                options: {
+                    a: "Pompa juga bisa digunakan untuk menaikkan fluida ke sebuah reservoir (Bagus, Purnama, 2013).",
+                    b: "Pompa juga bisa digunakan untuk menaikkan fluida ke sebuah reservoir (Bagus: 2013).",
+                    c: "Pompa juga bisa digunakan untuk menaikkan fluida ke sebuah reservoir (Bagus, 2013).",
+                    d: "Pompa juga bisa digunakan untuk menaikkan fluida ke sebuah reservoir (Purnama Bagus, 2013)."
+                },
+                correct: "c"
+            },
+            {
+                id: 16,
+                question: "Perhatikan daftar buku berikut! (1) Penulis : Sarwoko Mangkoediharjo. (2) Judul: Strategi Tulis Artikel Jurnal Internasional, (3) Tahun : 2009, (4) Kota : Surabaya, (5) Penerbit : Widyastana. Penulisan daftar pustaka yang benar adalah ...",
+                options: {
+                    a: "Mangkoediharjo, Sarwoko. Strategi Tulis Artikel Jurnal Internasional. Surabaya: Widyastana",
+                    b: "Mangkoediharjo, Sarwoko. 2009. Strategi Tulis Artikel Jurnal Internasional. Surabaya: Widyastana",
+                    c: "Sarwoko Mangkoediharjo. 2009. Strategi Tulis Artikel Jurnal Internasional. Surabaya: Widyastana",
+                    d: "Mangkoediharjo, Sarwoko. 2009. Strategi Tulis Artikel Internasional. Widyastana: Surabaya"
+                },
+                correct: "b"
+            },
+            {
+                id: 17,
+                question: "Penulisan daftar pustaka atas nama Dadang Solihin terbit tahun 2001 berikut yang benar adalah ...",
+                options: {
+                    a: "Solihin, Dadang. 2001. Otonomi Penyelenggaraan Pemerintah Daerah. Jakarta: Gramedia Pustaka Utama.",
+                    b: "Solihin, Dadang. Otonomi Penyelenggaraan Pemerintah Daerah. Jakarta: Gramedia Pustaka Utama.",
+                    c: "Dadang. 2001. Otonomi Penyelenggaraan Pemerintah Daerah. Jakarta: Gramedia Pustaka Utama.",
+                    d: "Dadang Solihin. 2001. Otonomi Penyelenggaraan Pemerintah Daerah. Jakarta: Gramedia Pustaka Utama."
+                },
+                correct: "a"
+            },
+            {
+                id: 18,
+                question: "Di Jakarta, pada tahun 1983 PT Karya Unipress telah menerbitkan sebuah buku yang berjudul Pengantar Novel Indonesia. Pengarangnya Jakob Sumardjo. Penulisan daftar pustaka yang tepat sesuai dengan data tersebut adalah ....",
+                options: {
+                    a: "Sumardjo, Jakob, 1983, Jakarta: Karya Unipress. Pengantar Novel Indonesia.",
+                    b: "Jakob Sumardjo. 1983. Novel Indonesia Pengantar. Jakarta: Karya Unipress.",
+                    c: "Pengantar Novel Indonesia. 1983. Jakob Sumardjo. Jakarta: Karya Unipress.",
+                    d: "Sumardjo, Jakob. 1983. Pengantar Novel Indonesia. Jakarta: Karya Unipress."
+                },
+                correct: "d"
+            },
+            {
+                id: 19,
+                question: "Perhatikan data kedua buku berikut : (1) Buku berjudul Perencanaan Pendidikan ditulis oleh Made Pidarta pada tahun 2007 dan diterbitkan PT Rineka Cipta di Jakarta. (2) Buku karya Hermawan Aksan berjudul Kiamat Sudah Dekat diterbitkan pada tahun 2005 oleh PT Pustaka Latifah, Bandung. Penulisan daftar pustaka yang tepat sesuai dengan data tersebut adalah . . . .",
+                options: {
+                    a: "Hermawan, Aksan. 2005. Kiamat Sudah Dekat. Bandung : Pustaka Latifah. Made, Pidarta, 2007. Perencanaan Pendidikan. Jakarta: Rineka Cipta",
+                    b: "Aksan, Hermawan. Kiamat Sudah Dekat. 2005. Bandung : Pustaka Latifah. Pidarta, Made. Perencanaan Pendidikan. 2007. Jakarta: Rineka Cipta.",
+                    c: "Aksan, Hermawan. 2005. Kiamat Sudah Dekat. Bandung: Pustaka Latifah. Pidarta, Made. 2007. Perencanaan Pendidikan. Jakarta: Rineka Cipta.",
+                    d: "Pidarta, Made. 2007. Perencanaan pendidikan. Jakarta: Roneka Cipta. Aksan, Hermawan. 2005. Kiamat Sudah Dekat. Bandung: Pustaka Latifah."
+                },
+                correct: "c"
+            },
+            {
+                id: 20,
+                question: "Data buku : (i) Buku berjudul Jejak-jejak Makna: Memasuki Kembali Rumah Kebahagiaan, dikarang oleh Gede Prama. Buku tersebut diterbitkan oleh PT Gramedia Pustaka Utama di Jakarta tahun 2004, (ii) Buku berjudul Agar Menulis-Mengarang Bisa Gampang, ditulis oleh Andrias Harefa pada tahun 2002. Buku tersebut diterbitkan oleh PT Gramedia Pustaka Utama di Jakarta. Bentuk penulisan daftar pustaka yang tepat untuk kedua buku tersebut adalah ...",
+                options: {
+                    a: "Gede Prama. 2004. Jejak-jejak Makna: Memasuki Kembali Rumah Kebahagiaan. Jakarta: PT Gramedia Pustaka Utama. Andrias Harefa. 2002. Agar Menulis-Mengarang Bisa Gampang. Jakarta: PT Gramedia Pustaka Utama.",
+                    b: "Prama, Gede. 2004. Jejak-jejak Makna: Memasuki Kembali Rumah Kebahagiaan. Jakarta: PT Gramedia Pustaka Utama. Harefa, Andrias. 2002. Agar Menulis-Mengarang Bisa Gampang. PT Gramedia Pustaka Utama: Jakarta.",
+                    c: "Harefa, Andrias. 2002. Agar Menulis-Mengarang Bisa Gampang. Jakarta: PT Gramedia Pustaka Utama. Prama, Gede. 2004. Jejak-jejak Makna: Memasuki Kembali Rumah Kebahagiaan. Jakarta: PT Gramedia Pustaka Utama.",
+                    d: "Gede Prama. Jejak-jejak Makna: Memasuki Kembali Rumah Kebahagiaan. 2004. Jakarta: PT Gramedia Pustaka Utama. Harefa, Andrias. 2002. Agar Menulis-Mengarang Bisa Gampang. PT Gramedia Pustaka Utama. Jakarta."
+                },
+                correct: "c"
+            },
+            {
+                id: 21,
+                question: "Penulisan daftar pustaka dari sumber Suratman terbit tahun 2001 hal. 76 berikut yang benar adalah ...",
+                options: {
+                    a: "Suratman. Januari 2001. Servis dan Reparasi Auto Mobil. Bandung: Pustaka Grafika.",
+                    b: "Suratman. Januari 2001 hal. 76. Servis dan Reparasi Auto Mobil. Bandung: Pustaka Grafika.",
+                    c: "Suratman. 2001. Servis dan Reparasi Auto Mobil. Bandung: Pustaka Grafika.",
+                    d: "Suratman. 2001 hal. 76. Servis dan Reparasi Auto Mobil. Bandung: Pustaka Grafika."
+                },
+                correct: "c"
+            },
+            {
+                id: 22,
+                question: "Teknik pengutipan atas nama Maman Suryaman adalah...",
+                options: {
+                    a: "Maman Suryaman (2000: 47) menjelaskan kepemilikan peserta didik akan fasilitas belajar berkorelasi positif dengan prestasi belajar peserta didik.",
+                    b: "Suryaman (2000: 47) menjelaskan, kepemilikan peserta didik akan fasilitas belajar berkorelasi positif dengan prestasi belajar peserta didik.",
+                    c: "Menurut (Maman Suryaman , 2000: 47) menjelaskan kepemilikan peserta didik akan fasilitas belajar berkorelasi positif dengan prestasi belajar peserta didik.",
+                    d: "Menurut (Suryaman: 2000, 47) kepemilikan peserta didik akan fasilitas belajar berkorelasi positif dengan prestasi belajar peserta didik."
+                },
+                correct: "b"
+            },
+            {
+                id: 23,
+                question: "Penulisan footnote yang benar atas nama Dr. Jasa Ungguh Muliawan adalah....",
+                options: {
+                    a: "Dr. Jasa Ungguh Muliawan, 2005, Pendidikan Islam Integratif, Yogyakarta: Pustaka Pelajar. Hal. 31",
+                    b: "Muliawan, Jasa Ungguh. Pendidikan Islam Integratif. Yogyakarta: Pustaka Pelajar. 2005.",
+                    c: "Dr. Jasa Ungguh Muliawan, Pendidikan Islam Integratif, Yogyakarta: Pustaka Pelajar, 2005, Hal. 31",
+                    d: "Muliawan, Jasa Ungguh. Dr. 2005. Pendidikan Islam Integratif. Yogyakarta: Pustaka Pelajar."
+                },
+                correct: "c"
+            },
+            {
+                id: 24,
+                question: "Penulisan pengutipan dari sumber Onny Apriyahanda terbit tahun 2014 yang benar adalah ...",
+                options: {
+                    a: "Pompa dinamik juga bisa beroperasi pada kecepatan dan debit aliran yang tinggi (Onny Apriyahanda, 2014).",
+                    b: "Pompa dinamik juga bisa beroperasi pada kecepatan dan debit aliran yang tinggi (Onny, 2014).",
+                    c: "Pompa dinamik juga bisa beroperasi pada kecepatan dan debit aliran yang tinggi (Apriyahanda, Onny, 2014).",
+                    d: "Pompa dinamik juga bisa beroperasi pada kecepatan dan debit aliran yang tinggi (Apriyahanda, 2014)."
+                },
+                correct: "b"
+            },
+            {
+                id: 25,
+                question: "Penulisan daftar pustaka dari sumber referensi berikut yang benar yaitu ...",
+                options: {
+                    a: "Bachtiar, Maryati. 2012. Hukum Waris Islam Dipandang dari Perspektif Hukum Berkeadilan Gender. Jurnal Ilmu Hukum. Vol. 3 No. 1",
+                    b: "MARYATI BACHTIAR.2012.HUKUM WARIS ISLAM DIPANDANG DARI PERSPEKTIF HUKUM BERKEADILAN GENDER.JURNAL ILMU HUKUM.VOLUME 3 NO. 1",
+                    c: "Bachtiar, Maryati. Hukum Waris Islam Dipandang dari Perspektif Hukum Berkeadilan Gender. JURNAL ILMU HUKUM. Vol. 3 No. 1 tahun 2012.",
+                    d: "Maryati Bachtiar, Hukum Waris Islam Dipandang dari Perspektif Hukum Berkeadilan Gender. JURNAL ILMU HUKUM. Vol. 3 No. 1 tahun 2012."
+                },
+                correct: "a"
+            },
+            {
+                id: 26,
+                question: "Penulisan judul karya tulis ilmiah yang tepat berikut adalah ...",
+                options: {
+                    a: "Analisa Pengaruh Promosi terhadap Peningkatan Penjualan pada Pt. Martina Berto",
+                    b: "Analisis pengaruh promosi terhadap peningkatan penjualan pada PT. Martina Berto",
+                    c: "Analisa Pengaruh Promosi terhadap Peningkatan Penjualan pada PT Martina Berto",
+                    d: "Analisis Pengaruh Promosi terhadap Peningkatan Penjualan pada PT Martina Berto"
+                },
+                correct: "b"
+            },
+            {
+                id: 27,
+                question: "Penulisan pengutipan dari sumber Yefri Chan yang benar adalah ...",
+                options: {
+                    a: "Menurut Chan (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi.",
+                    b: "Menurut Yefri Chan (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi.",
+                    c: "Menurut Chan, Yefri (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi.",
+                    d: "Menurut Chan (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi."
+                },
+                correct: "a"
+            },
+            {
+                id: 28,
+                question: "Penulisan judul yang sesuai dengan EYD adalah ...",
+                options: {
+                    a: "Peningkatan Swa Sembada Pangan",
+                    b: "Perhatian pada Wawasan Kebangsaan dan Swa Sembada Pangan",
+                    c: "Pemberdayaan Petani dalam Peningkatan Swasembada Pangan",
+                    d: "Peningkatan kesejahteraan Bangsa Dengan Swasembada Pangan"
+                },
+                correct: "c"
+            },
+            {
+                id: 29,
+                question: "Penulisan daftar pustaka dari sumber Yefri Chan terbit tahun 2015 dari sumber blog yang benar adalah..",
+                options: {
+                    a: "Mechanical Blog (online) dari sumber: http://yefrichan.files.wordpress.com. Pada 20 April 2015",
+                    b: "Chan, Yefri. 2015. Mechanical Blog (online) dari sumber: http://yefrichan.files.wordpress.com. Pada 20 April 2015",
+                    c: "Chan, Yefri. Mechanical Blog (online) dari sumber: http://yefrichan.files.wordpress.com. Pada 20 April 2015",
+                    d: "http://yefrichan.files.wordpress.com. Diakses pada 20 April 2015"
+                },
+                correct: "b"
+            },
+            {
+                id: 30,
+                question: "Penulisan daftar pustaka dari sumber penulis Prof. Ir. Nyoman Pujawan, M.Eng. yang benar adalah ...",
+                options: {
+                    a: "Nyoman Pujawan. 2009. Ekonomi Teknik. Widyastana. Surabaya",
+                    b: "Nyoman Pujawan. 2009. Ekonomi Teknik. Surabaya: Widyastana",
+                    c: "Pujawan, Nyoman. 2009. Ekonomi Teknik. Surabaya: Widyastana",
+                    d: "Nyoman Pujawan. 2009. Ekonomi Teknik. Surabaya: Widyastana"
+                },
+                correct: "c"
+            }
+        ];
+
+        // State Management
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // Format: { questionId: 'a' }
+        let timerInterval;
+        let timeLeft = 3600; // 60 menit dalam detik
+
+        // DOM Elements
+        const screens = {
+            intro: document.getElementById('intro-screen'),
+            exam: document.getElementById('exam-screen'),
+            result: document.getElementById('result-screen')
+        };
+        const elements = {
+            questionText: document.getElementById('question-text'),
+            optionsContainer: document.getElementById('options-container'),
+            qNumber: document.getElementById('q-number'),
+            qStatus: document.getElementById('q-status'),
+            btnPrev: document.getElementById('btn-prev'),
+            btnNext: document.getElementById('btn-next'),
+            btnFinish: document.getElementById('btn-finish'),
+            gridContainer: document.getElementById('question-grid'),
+            timer: document.getElementById('timer'),
+            timerContainer: document.getElementById('timer-container'),
+            modal: document.getElementById('modal-confirm')
+        };
+
+        // Initialize Exam
+        function startExam() {
+            screens.intro.classList.add('hidden');
+            screens.exam.classList.remove('hidden');
+            screens.exam.classList.add('flex');
+            elements.timerContainer.classList.remove('hidden');
+            
+            startTimer();
+            renderQuestionGrid();
+            loadQuestion(0);
+        }
+
+        // Timer Logic
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    calculateResult(true); // Force finish
+                    return;
+                }
+                timeLeft--;
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+                elements.timer.textContent = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+                
+                // Alert visual jika waktu < 5 menit
+                if (timeLeft < 300) {
+                    elements.timerContainer.classList.remove('bg-indigo-800');
+                    elements.timerContainer.classList.add('bg-red-600', 'animate-pulse');
+                }
+            }, 1000);
+        }
+
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
+
+        // Render Current Question
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const data = questionsData[index];
+
+            // Update UI
+            elements.qNumber.textContent = index + 1;
+            elements.questionText.textContent = data.question;
+            
+            // Status Badge
+            if (userAnswers[data.id]) {
+                elements.qStatus.textContent = "Sudah Dijawab";
+                elements.qStatus.className = "bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-bold";
+            } else {
+                elements.qStatus.textContent = "Belum Dijawab";
+                elements.qStatus.className = "bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full font-bold";
+            }
+
+            // Render Options
+            elements.optionsContainer.innerHTML = '';
+            Object.keys(data.options).forEach(key => {
+                const label = document.createElement('label');
+                label.className = `flex items-center p-4 border-2 rounded-lg cursor-pointer hover:bg-gray-50 option-label ${userAnswers[data.id] === key ? 'border-indigo-600 bg-indigo-50' : 'border-gray-200'}`;
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'answer';
+                input.value = key;
+                input.className = 'option-radio form-radio h-5 w-5 text-indigo-600 hidden';
+                input.checked = userAnswers[data.id] === key;
+                
+                input.onchange = () => selectAnswer(data.id, key);
+
+                const spanKey = document.createElement('span');
+                spanKey.className = `w-8 h-8 flex items-center justify-center rounded-full mr-3 text-sm font-bold border flex-shrink-0 ${userAnswers[data.id] === key ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-100 text-gray-600 border-gray-300'}`;
+                spanKey.textContent = key.toUpperCase();
+
+                const spanText = document.createElement('span');
+                spanText.className = 'text-gray-700 flex-1';
+                spanText.textContent = data.options[key];
+
+                label.appendChild(input);
+                label.appendChild(spanKey);
+                label.appendChild(spanText);
+                elements.optionsContainer.appendChild(label);
+            });
+
+            // Update Buttons State
+            elements.btnPrev.disabled = index === 0;
+            if (index === questionsData.length - 1) {
+                elements.btnNext.classList.add('hidden');
+                elements.btnFinish.classList.remove('hidden');
+            } else {
+                elements.btnNext.classList.remove('hidden');
+                elements.btnFinish.classList.add('hidden');
+            }
+
+            // Update Grid Active State
+            updateGridHighlight();
+        }
+
+        function selectAnswer(qId, answer) {
+            userAnswers[qId] = answer;
+            
+            // Re-render to update UI styles immediately
+            loadQuestion(currentQuestionIndex);
+            
+            // Update grid color
+            const gridBtn = document.getElementById(`grid-btn-${currentQuestionIndex}`);
+            if (gridBtn) {
+                gridBtn.classList.remove('bg-gray-200', 'text-gray-600');
+                gridBtn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-600');
+            }
+        }
+
+        // Navigation
+        function nextQuestion() {
+            if (currentQuestionIndex < questionsData.length - 1) {
+                loadQuestion(currentQuestionIndex + 1);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                loadQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        // Sidebar Grid
+        function renderQuestionGrid() {
+            elements.gridContainer.innerHTML = '';
+            questionsData.forEach((q, index) => {
+                const btn = document.createElement('button');
+                btn.id = `grid-btn-${index}`;
+                btn.textContent = index + 1;
+                btn.className = `h-10 w-full rounded border font-medium text-sm transition ${userAnswers[q.id] ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-200 text-gray-600 border-gray-300 hover:bg-gray-300'}`;
+                btn.onclick = () => loadQuestion(index);
+                elements.gridContainer.appendChild(btn);
+            });
+        }
+
+        function updateGridHighlight() {
+            // Reset active border on all grid buttons
+            Array.from(elements.gridContainer.children).forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-yellow-400', 'ring-offset-1');
+            });
+            // Add to current
+            const currentBtn = document.getElementById(`grid-btn-${currentQuestionIndex}`);
+            if (currentBtn) {
+                currentBtn.classList.add('ring-2', 'ring-yellow-400', 'ring-offset-1');
+            }
+        }
+
+        // Finishing Exam
+        function confirmFinish() {
+            elements.modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            elements.modal.classList.add('hidden');
+        }
+
+        function calculateResult(isTimeOut = false) {
+            clearInterval(timerInterval);
+            closeModal();
+            if(isTimeOut) alert("Waktu Habis! Jawaban akan dikumpulkan otomatis.");
+
+            let correctCount = 0;
+            let wrongCount = 0;
+            let emptyCount = 0;
+
+            questionsData.forEach(q => {
+                const userAns = userAnswers[q.id];
+                if (!userAns) {
+                    emptyCount++;
+                } else if (userAns === q.correct) {
+                    correctCount++;
+                } else {
+                    wrongCount++;
+                }
+            });
+
+            const finalScore = (correctCount / questionsData.length) * 100;
+
+            // Render Result
+            document.getElementById('final-score').textContent = Math.round(finalScore);
+            document.getElementById('total-correct').textContent = correctCount;
+            document.getElementById('total-wrong').textContent = wrongCount;
+            document.getElementById('total-skipped').textContent = emptyCount;
+
+            screens.exam.classList.add('hidden');
+            screens.exam.classList.remove('flex');
+            elements.timerContainer.classList.add('hidden');
+            screens.result.classList.remove('hidden');
+
+            prepareReview();
+        }
+
+        function prepareReview() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '<h3 class="text-xl font-bold text-gray-800 ml-2 mb-4">Pembahasan Jawaban</h3>';
+
+            questionsData.forEach((q, index) => {
+                const userAns = userAnswers[q.id];
+                const isCorrect = userAns === q.correct;
+                const isSkipped = !userAns;
+
+                const card = document.createElement('div');
+                card.className = `p-6 rounded-lg border-l-4 shadow-sm ${isCorrect ? 'bg-green-50 border-green-500' : (isSkipped ? 'bg-gray-50 border-gray-400' : 'bg-red-50 border-red-500')}`;
+
+                let statusText = '';
+                if(isCorrect) statusText = '<span class="text-green-700 font-bold">Benar</span>';
+                else if(isSkipped) statusText = '<span class="text-gray-600 font-bold">Tidak Dijawab</span>';
+                else statusText = '<span class="text-red-600 font-bold">Salah</span>';
+
+                let optionsHtml = '<div class="mt-3 space-y-2">';
+                Object.keys(q.options).forEach(key => {
+                    let optClass = "p-2 rounded border ";
+                    // Logic styling opsi di review
+                    if (key === q.correct) {
+                        optClass += "bg-green-100 border-green-500 text-green-800 font-semibold"; // Kunci Jawaban
+                    } else if (key === userAns && !isCorrect) {
+                        optClass += "bg-red-100 border-red-500 text-red-800"; // Jawaban Salah User
+                    } else {
+                        optClass += "bg-white border-gray-200 text-gray-500";
+                    }
+                    
+                    optionsHtml += `<div class="${optClass} flex"><span class="w-6 text-center mr-2 font-mono flex-shrink-0">${key.toUpperCase()}.</span> <span class="flex-1">${q.options[key]} ${key === q.correct ? '✓' : ''}</span></div>`;
+                });
+                optionsHtml += '</div>';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="font-bold text-gray-700">No. ${index + 1}</span>
+                        ${statusText}
+                    </div>
+                    <p class="text-gray-800 mb-2 font-medium">${q.question}</p>
+                    ${optionsHtml}
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function showReview() {
+            document.getElementById('review-container').classList.remove('hidden');
+            // Scroll ke bagian review
+            document.getElementById('review-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+    </script>
+</body>
+</html>
