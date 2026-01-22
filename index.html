@@ -62,7 +62,7 @@
             <ul class="text-left text-sm text-gray-600 bg-indigo-50 p-4 rounded-lg mb-8 space-y-2">
                 <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> Materi mencakup Teknik Pengutipan, Daftar Pustaka, & Penulisan Ilmiah.</li>
                 <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> Jawaban disesuaikan dengan koreksi video terbaru.</li>
-                <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> Nilai akan langsung muncul setelah selesai.</li>
+                <li class="flex items-start"><span class="mr-2 text-indigo-500">✓</span> <strong>Auto-save:</strong> Progres tersimpan otomatis jika di-reload.</li>
             </ul>
             <button onclick="startExam()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition transform hover:scale-105">
                 Mulai Ujian Sekarang
@@ -153,7 +153,7 @@
                     </div>
 
                     <div class="flex justify-center gap-4">
-                        <button onclick="location.reload()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
+                        <button onclick="resetExam()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg">
                             Ulangi Ujian
                         </button>
                         <button onclick="showReview()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg">
@@ -203,7 +203,7 @@
                 id: 2,
                 question: "Penulisan pengutipan yang benar dari sumber penulis Azhar Azhari, tahun 2001, dan halaman yang dikutip 75-76 berikut adalah ...",
                 options: {
-                    a: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhari, 2001: 75-76).",
+                    a: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhari; 2001, 75-76).",
                     b: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhari, 2001: 75-76).",
                     c: "(Azhar Azhari, 2001) ada beberapa kriteria yang patut diperhatikan dalam memilih media.",
                     d: "Ada beberapa kriteria yang patut diperhatikan dalam memilih media (Azhar Azhari, 2001: 75-76)."
@@ -236,7 +236,7 @@
                 id: 5,
                 question: "Penulisan penutipan yang benar dari sumber Gunawan Dwi Nugroho tahun 2008 adalah ...",
                 options: {
-                    a: "Dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor (Nugroho, 2008).",
+                    a: "Dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor (Nugroho: 2008).",
                     b: "Menurut (Nugroho, Gunawan Dwi: 2008), dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor.",
                     c: "Dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor (Nugroho, 2008).",
                     d: "Menurut Gunawan Dwi Nugroho (2008), dalam satu hari pengerjaan, reboring traksi motor dan penggantian excle cup bisa menyelesaikan satu atau dua traksi motor."
@@ -280,10 +280,10 @@
                 id: 9,
                 question: "Penulisan daftar pustaka yang tepat dari sumber (Judul: Ranjang Prokustes, Penulis: Nasim Nicholas Taleb, Penerbit: Gramedia, tahun 2011 yang benar adalah",
                 options: {
-                    a: "Taleb, Nasim Nicholas. Ranjang Prokutes. Jakarta: Gramedia. 2011.",
-                    b: "Nasim Nicholas Taleb. Ranjang Prokutes. Jakarta: Gramedia. 2011.",
-                    c: "Taleb, Nasim Nicholas. 2011. Ranjang Prokutes. Jakarta: Gramedia.",
-                    d: "Nasim Nicholas Taleb. 2011.Ranjang Prokutes. Jakarta: Gramedia."
+                    a: "Taleb, Nasim Nicholas. Ranjang Prokustes. Jakarta: Gramedia. 2011.",
+                    b: "Nasim Nicholas Taleb. Ranjang Prokustes. Jakarta: Gramedia. 2011.",
+                    c: "Taleb, Nasim Nicholas. 2011. Ranjang Prokustes. Jakarta: Gramedia.",
+                    d: "Nasim Nicholas Taleb. 2011.Ranjang Prokustes. Jakarta: Gramedia."
                 },
                 correct: "c"
             },
@@ -322,7 +322,7 @@
             },
             {
                 id: 13,
-                question: "Penulisan daftra pustaka yang benar dari sumber Subroto di dalam tulisan B.S. Anwir terbit tahun 1986 adalah...",
+                question: "Penulisan daftar pustaka yang benar dari sumber Subroto di dalam tulisan B.S. Anwir terbit tahun 1986 adalah...",
                 options: {
                     a: "Subroto, Joko dalam Anwir, B.S. 1986. Menggunakan Peralatan Pembanding dan Perkakas Tangan. Jakarta: Bhratara Karya Aksara",
                     b: "Anwir, B.S. 1986. Menggunakan Peralatan Pembanding dan Perkakas Tangan. Jakarta: Bhratara Karya Aksara",
@@ -481,7 +481,7 @@
                     a: "Menurut Chan (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi.",
                     b: "Menurut Yefri Chan (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi.",
                     c: "Menurut Chan, Yefri (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi.",
-                    d: "Menurut Chan (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi."
+                    d: "Menurut Chan, (2010), sinyal disebut deterministic, selama harga dari sinyal dapat diprediksi."
                 },
                 correct: "a"
             },
@@ -525,6 +525,7 @@
         let userAnswers = {}; // Format: { questionId: 'a' }
         let timerInterval;
         let timeLeft = 3600; // 60 menit dalam detik
+        const STORAGE_KEY = 'uas_indo_state';
 
         // DOM Elements
         const screens = {
@@ -546,8 +547,51 @@
             modal: document.getElementById('modal-confirm')
         };
 
+        // --- Fitur Penyimpanan Otomatis (Auto-Save) ---
+        function saveProgress() {
+            // Tentukan status saat ini
+            const isExamActive = !screens.exam.classList.contains('hidden');
+            const isFinished = !screens.result.classList.contains('hidden');
+
+            const state = {
+                userAnswers: userAnswers,
+                timeLeft: timeLeft,
+                currentQuestionIndex: currentQuestionIndex,
+                isExamActive: isExamActive,
+                isFinished: isFinished
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function loadProgress() {
+            const savedState = localStorage.getItem(STORAGE_KEY);
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                
+                // Pulihkan data
+                userAnswers = state.userAnswers || {};
+                timeLeft = state.timeLeft || 3600;
+                currentQuestionIndex = state.currentQuestionIndex || 0;
+
+                // Logika pemulihan layar
+                if (state.isFinished) {
+                    // Jika sebelumnya sudah selesai, langsung hitung hasil
+                    calculateResult(false, true); // true = restore mode
+                } else if (state.isExamActive) {
+                    // Jika sedang ujian, lanjutkan ujian
+                    startExam(true); // true = restore mode
+                }
+            }
+        }
+
+        // Fungsi Reset (untuk tombol Ulangi Ujian)
+        function resetExam() {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+
         // Initialize Exam
-        function startExam() {
+        function startExam(isRestore = false) {
             screens.intro.classList.add('hidden');
             screens.exam.classList.remove('hidden');
             screens.exam.classList.add('flex');
@@ -555,11 +599,17 @@
             
             startTimer();
             renderQuestionGrid();
-            loadQuestion(0);
+            loadQuestion(currentQuestionIndex); // Memuat soal terakhir dibuka
+
+            if (!isRestore) {
+                saveProgress(); // Simpan status awal
+            }
         }
 
         // Timer Logic
         function startTimer() {
+            if (timerInterval) clearInterval(timerInterval); // Mencegah double interval
+
             timerInterval = setInterval(() => {
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
@@ -567,6 +617,10 @@
                     return;
                 }
                 timeLeft--;
+                
+                // Simpan setiap detik agar waktu akurat saat reload
+                saveProgress();
+
                 const hours = Math.floor(timeLeft / 3600);
                 const minutes = Math.floor((timeLeft % 3600) / 60);
                 const seconds = timeLeft % 60;
@@ -647,6 +701,7 @@
 
         function selectAnswer(qId, answer) {
             userAnswers[qId] = answer;
+            saveProgress(); // Simpan jawaban setiap kali memilih
             
             // Re-render to update UI styles immediately
             loadQuestion(currentQuestionIndex);
@@ -663,12 +718,14 @@
         function nextQuestion() {
             if (currentQuestionIndex < questionsData.length - 1) {
                 loadQuestion(currentQuestionIndex + 1);
+                saveProgress(); // Simpan index halaman
             }
         }
 
         function prevQuestion() {
             if (currentQuestionIndex > 0) {
                 loadQuestion(currentQuestionIndex - 1);
+                saveProgress(); // Simpan index halaman
             }
         }
 
@@ -680,7 +737,10 @@
                 btn.id = `grid-btn-${index}`;
                 btn.textContent = index + 1;
                 btn.className = `h-10 w-full rounded border font-medium text-sm transition ${userAnswers[q.id] ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-gray-200 text-gray-600 border-gray-300 hover:bg-gray-300'}`;
-                btn.onclick = () => loadQuestion(index);
+                btn.onclick = () => {
+                    loadQuestion(index);
+                    saveProgress();
+                };
                 elements.gridContainer.appendChild(btn);
             });
         }
@@ -706,7 +766,7 @@
             elements.modal.classList.add('hidden');
         }
 
-        function calculateResult(isTimeOut = false) {
+        function calculateResult(isTimeOut = false, isRestore = false) {
             clearInterval(timerInterval);
             closeModal();
             if(isTimeOut) alert("Waktu Habis! Jawaban akan dikumpulkan otomatis.");
@@ -737,9 +797,15 @@
             screens.exam.classList.add('hidden');
             screens.exam.classList.remove('flex');
             elements.timerContainer.classList.add('hidden');
+            
+            screens.intro.classList.add('hidden'); // Pastikan intro hidden jika restore
             screens.result.classList.remove('hidden');
 
             prepareReview();
+
+            if (!isRestore) {
+                saveProgress(); // Simpan status selesai
+            }
         }
 
         function prepareReview() {
@@ -792,6 +858,9 @@
             // Scroll ke bagian review
             document.getElementById('review-container').scrollIntoView({ behavior: 'smooth' });
         }
+
+        // Cek LocalStorage saat halaman dimuat
+        window.addEventListener('load', loadProgress);
 
     </script>
 </body>
